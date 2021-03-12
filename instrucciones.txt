@@ -1,0 +1,16 @@
+Para instalar las dependencias: 
+1) Abrir Anaconda Promp desde la terminal
+2) Copiar la dirección donde está la carpeta del validador
+   Ejemplos: C:\Users\ramir\Documents\RBIRD\Naranja\Trabajo 7 Python\Nueva version
+3) Pegar en Anaconda Promp lo siguiente: 
+   cd "C:\Users\ramir\Documents\RBIRD\Naranja\Trabajo 7 Python\Nueva version"
+   REEMPLAZAR CON LA DIRECCIÓN PROPIA DE SU PC
+4) Escribir en Anaconda Promp lo siguiente:
+	conda create --name env_promos --file spec-file.txt
+5)Escribir en Anaconda Promp lo siguiente:
+	conda activate env_promos
+6)Escribir en Anaconda Promp lo siguiente:
+	pip install -r requerimientos.txt
+7) Si alguno de estos pasos pide validación escriba que si (Y)
+8)Escribir en Anaconda Promp lo siguiente:
+	validador_promociones.py

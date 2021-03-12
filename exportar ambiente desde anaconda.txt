@@ -1,0 +1,7 @@
+1) Entrar Anaconda Promp 
+2) Activar ambiente que queremos:
+	conda activate ambiente
+3) Exportamos spec-file.txt:
+	conda list --explicit > spec-file.txt
+4) Exportamos librerias:
+	pip freeze > requirements.txt
