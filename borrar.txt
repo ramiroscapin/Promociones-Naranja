@@ -1,5 +1,7 @@
 Para la columna NOMBRE DE FANTASÍA los errores son:
 
+El error 'ramiroscapinjaja' se repite en las filas: [1]
+
 El error 'rex' se repite en las filas: [20]
 
 El error 'PiNtUrErEa 123' se repite en las filas: [21]

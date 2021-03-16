@@ -1,27 +1,33 @@
 from tkinter import *
 from tkinter import font
+from tkinter import filedialog
+from tkinter.filedialog import askopenfile 
 
+#Cramos raiz o root de nuestra aplicacion
 ventana = Tk()
 ventana.title("Validador Promociones")
-ventana.geometry("400x200")
+ventana.geometry("740x470")
 ventana.resizable(False,False)
-ventana.configure(background="#F0EBE6")
-
+ventana.configure(background="#FF7207")
 
 
 color_boton = "#FF9E1B"
-ancho_boton = 38
-alto_boton = 2
 operador = ""
 texto_pantalla = StringVar()
-
-
 
 def clear():
     global operador
     operador = ""
     texto_pantalla.set(operador)
     
+def mfileopen():
+    file1 = filedialog.askopenfile()
+    ruta_excel = ((str(file1)).split("'"))[1]
+    label = Label(text=file1)
+    pantalla_ruta_excel.insert(0,ruta_excel)
+    return(((str(file1)).split("'"))[1])
+        
+
 def correr_programa():
     from datetime import datetime, date, time, timedelta
     import calendar
@@ -32,12 +38,13 @@ def correr_programa():
         return lista_sin_duplicados
 
     def levantar_excel():
+        
         try:
             #nombre_excel = str(input("Escriba el Nombre del Excel: ")) + ".xlsx"
             #nombre_hoja = str(input("Escriba el Nombre de la Hoja: "))
             ###################### BORRAR
-            nombre_excel = "Copia de Ernesto Liberatore.xlsx"
-            nombre_hoja = "cartera tito"
+            nombre_excel =pantalla_ruta_excel.get()
+            nombre_hoja = str(txt_hoja_excel.get())
             ###################### BORRAR
             xls = pd.read_excel(nombre_excel,sheet_name=nombre_hoja)
             xls_desplegable = pd.read_excel(nombre_excel,sheet_name='Desplegable')
@@ -357,7 +364,7 @@ def correr_programa():
 
             #output.write(str(errores_list))
             print("Escrito ERRORES en borrar.txt")
-            operador = "Escrito ERRORES en borrar.txt"
+            operador = "Errores escritos en archivo borrar.txt"
             texto_pantalla.set(operador)
             return 
 
@@ -403,19 +410,22 @@ def correr_programa():
             revisar_especificacion() """
     
 
-texto = Label(ventana, text="Bienvenido al validador de promociones",font=("helvetica"), fg=("black"))
-texto.place(x=50,y=10)
-texto1 = Label(ventana, text="Al presionar el Boton CORRER PROGRAMA")
-texto1.place(x=80, y=130)
-texto2 = Label(ventana, text="aguarde unos segundos que el programa se esta cargando")
-texto2.place(x=50, y=150)
-texto3 = Label(ventana, text ="Gracias!")
-texto3.place(x=180, y=170)
-boton_correr_programa = Button(ventana, text = "CORRER PROGRAMA", bg=color_boton , width = 50, height = alto_boton, command = correr_programa)
-boton_correr_programa.place(x=20 , y=80)
+imagen = PhotoImage(file="fondo3.png")    
+background = Label(image = imagen)
+background.place(x = 0, y = 0, relwidth = 1, relheight = 1)
 
 
-Pantalla = Entry(ventana,width = 58 , borderwidth = 3, background = '#F7AE4F',textvariable = texto_pantalla)
-Pantalla.place(x=20,y=40)
+txt_hoja_excel = Entry(ventana,width = 57 , borderwidth = 8, background = '#F0EBE6')
+txt_hoja_excel.place(x=355,y=260)
+
+
+boton_cargar_excel = Button(ventana, text = "Buscar Excel", bg=color_boton , width = 50, height = 2, command = mfileopen)
+boton_cargar_excel.place(x=355 , y=110)
+pantalla_ruta_excel = Entry(ventana,width = 57, borderwidth = 8, background = '#FFCE8F')
+pantalla_ruta_excel.place(x=355,y=165)
+
+boton_cargar = Button(ventana, text = "Correr Programa !", bg=color_boton , width = 50, height = 2, command = correr_programa)
+boton_cargar.place(x=355 , y=330)
+
+# Ejecutamos el bucle infinito
 ventana.mainloop()
-
