@@ -3,6 +3,13 @@ from tkinter import font
 from tkinter import filedialog
 from tkinter.filedialog import askopenfile 
 from tkinter import messagebox as mb
+from tkinter import ttk
+import tkinter as tk
+import xlrd
+from datetime import datetime, date, time, timedelta
+import calendar
+from pprint import pprint
+import pandas as pd
 
 #Cramos raiz o root de nuestra aplicacion
 ventana = Tk()
@@ -18,12 +25,18 @@ operador = ""
 def clear():
     pantalla_ruta_excel.delete(0,'end')
     
-def mfileopen():
+def mfileopen(ventana):
     file1 = filedialog.askopenfile()
     ruta_excel = ((str(file1)).split("'"))[1]
     label = Label(text=file1)
     pantalla_ruta_excel.insert(0,ruta_excel)
-    return(((str(file1)).split("'"))[1])
+    xls = xlrd.open_workbook(ruta_excel, on_demand=True)
+    # cargar lista de hojas
+    lista_hojas_excel = list(xls.sheet_names())
+    global lista_desplegable
+    lista_desplegable = ttk.Combobox(ventana, width = 63, values = lista_hojas_excel)
+    lista_desplegable.place(x=684,y=442)
+    return ruta_excel
 
 def opentxt():
     import os
@@ -36,10 +49,6 @@ def opentxt():
 def correr_programa():
     try:
         
-        from datetime import datetime, date, time, timedelta
-        import calendar
-        from pprint import pprint
-        import pandas as pd
         def eliminar_duplicados(lista_con_duplicados):
             lista_sin_duplicados = list(dict.fromkeys(lista_con_duplicados))
             return lista_sin_duplicados
@@ -51,7 +60,7 @@ def correr_programa():
                 #nombre_hoja = str(input("Escriba el Nombre de la Hoja: "))
                 ###################### BORRAR
                 nombre_excel =pantalla_ruta_excel.get()
-                nombre_hoja = str(txt_hoja_excel.get())
+                nombre_hoja = str(lista_desplegable.get())
                 ###################### BORRAR
                 xls = pd.read_excel(nombre_excel,sheet_name=nombre_hoja)
                 xls_desplegable = pd.read_excel(nombre_excel,sheet_name='Desplegable')
@@ -95,7 +104,7 @@ def correr_programa():
                         else:
                             dic[item].append(index)
 
-            if columna_xls == 'APLICACIÓN DEL DESCUENTO':
+            if columna_xls == 'APLICACIONDESCUENTO':
                 try:
                     del dic["nan"]
                 except:
@@ -113,13 +122,13 @@ def correr_programa():
             return(base["columna_concatenada"])
 
         def revisar_nombre_fantasia(xls, errores_list):
-            # NOMBRE DE FANTASÍA: 
+            # NOMBREDECOMERCIO: 
             # Deben estar escrito con la primera letra en mayúscula y el resto en minúscula, por cada palabra. 
             # Ejemplo: Casa Del Audio 
-            nombre_columna = 'NOMBRE DE FANTASÍA' 
+            nombre_columna = 'NOMBREDECOMERCIO' 
             errores_list = revisar_istitle(xls, errores_list, nombre_columna)
             ### TEST 
-            #df = xls[not xls['NOMBRE DE FANTASÍA'].istitle()]['NOMBRE DE FANTASÍA']
+            #df = xls[not xls['NOMBREDECOMERCIO'].istitle()]['NOMBREDECOMERCIO']
             return errores_list
 
         def revisar_rubro(xls, desplegable, errores_list):
@@ -150,7 +159,7 @@ def correr_programa():
             # DIRECCIÓN: Deben estar escrito con la primera letra en mayúscula y el resto en minúscula, 
             # por cada palabra. 
             # Ejemplo: Av. Corrientes 3135  
-            nombre_columna = 'DIRECCIÓN '
+            nombre_columna = 'DIRECCIÓN'
             errores_list = revisar_istitle(excel, errores_list, nombre_columna)
             return errores_list
 
@@ -159,7 +168,7 @@ def correr_programa():
             # Se puede usar la validación de datos o control de duplicados. 
             # No deben quedar celdas sin información.  
             nombre_col_desplegable = 'PLAN PRINCIPAL'
-            nombre_col_xls = 'PLAN PRINCIPAL'
+            nombre_col_xls = 'PLANPRINCIPAL'
             errores_list = revisar_desplegable(excel, desplegable, errores_list, nombre_col_desplegable, nombre_col_xls)
             return errores_list
 
@@ -170,7 +179,7 @@ def correr_programa():
             """
             dic = {}
             # Tomo todas las que tengan cero interés
-            cero_int = df[df['PLAN PRINCIPAL'].str.contains("cero int", na=False)]
+            cero_int = df[df['PLANPRINCIPAL'].str.contains("cero int", na=False)]
             # Si son de cero interés, y las columnas no son 0, es un error.
             errores_CFT = cero_int.loc[(cero_int['CFT'] != 0)]
             errores_TEA = cero_int.loc[(cero_int['TEA'] != 0)]
@@ -189,7 +198,7 @@ def correr_programa():
             """
             dic = {}
             # Tomo todas las que tengan cero interés
-            cuotas_fijas = df[df['PLAN PRINCIPAL'].str.contains("cuotas fijas", na=False)]
+            cuotas_fijas = df[df['PLANPRINCIPAL'].str.contains("cuotas fijas", na=False)]
             # Si son de cero interés, y las columnas no son 0, es un error.
             errores_CFT = cuotas_fijas.loc[(cuotas_fijas['CFT'] == 0)]
             errores_TEA = cuotas_fijas.loc[(cuotas_fijas['TEA'] == 0)]
@@ -208,7 +217,7 @@ def correr_programa():
             # Si se trata de un plan cero interés el costo debe ser 0,00%, 
             # Si se trata de plan con cuota fija se debe informar el costo.
 
-            columnas = ['PLAN PRINCIPAL', 'CFT', 'TEA', 'TNA']
+            columnas = ['PLANPRINCIPAL', 'CFT', 'TEA', 'TNA']
             selec = excel[columnas]
             errores_list = revisar_cero_interes(selec, errores_list)
             errores_list = revisar_cuotas_fijas(selec, errores_list)
@@ -220,7 +229,7 @@ def correr_programa():
             # Debe coincidir con la LISTA DESPLEGABLE. 
             # No deben quedar celdas sin información
             nombre_col_desplegable = 'DESCUENTO / OBSEQUIO PRICIPAL'
-            nombre_col_xls = 'DESCUENTO U OBSEQUIO PRINCIPAL'
+            nombre_col_xls = 'DESCUENTOOBSEQUIOPRINCIPAL'
             errores_list = revisar_desplegable(excel, desplegable, errores_list, nombre_col_desplegable, nombre_col_xls)
             return errores_list
 
@@ -229,17 +238,17 @@ def correr_programa():
             # Debe coincidir con la LISTA DESPLEGABLE. 
             # No deben quedar celdas sin información
             nombre_col_desplegable = 'APLICACIÓN DESCUENTO'
-            nombre_col_xls = 'APLICACIÓN DEL DESCUENTO'
+            nombre_col_xls = 'APLICACIONDESCUENTO'
             errores_list = revisar_desplegable(excel, desplegable, errores_list, nombre_col_desplegable, nombre_col_xls)
             return errores_list
 
         def verificar_sin_descuento_y_nulo_en_aplicacion_descuento(excel, errores_list):
             dic = {}
-            columna_con_nulos_ok = excel["APLICACIÓN DEL DESCUENTO"]
-            columna_sin_descuento = excel["DESCUENTO U OBSEQUIO PRINCIPAL"]
+            columna_con_nulos_ok = excel["APLICACIONDESCUENTO"]
+            columna_sin_descuento = excel["DESCUENTOOBSEQUIOPRINCIPAL"]
             indices_nulos = []
             indices_sin_descuento=[]
-            dic["Nulos en filas de la columna APLICACIÓN DEL DESCUENTO y no tengo escrito sin descuento en columna DESCUENTO U OBSEQUIO PRINCIPAL "] = []
+            dic["Nulos en filas de la columna APLICACIONDESCUENTO y no tengo escrito sin descuento en columna DESCUENTOOBSEQUIOPRINCIPAL "] = []
 
             for index, item in enumerate(columna_con_nulos_ok.isnull(), start = 1):
                 if item == True:
@@ -254,8 +263,8 @@ def correr_programa():
                             dic[item].append(index)
             for item in indices_nulos:
                 if item not in indices_sin_descuento:
-                    dic["Nulos en filas de la columna APLICACIÓN DEL DESCUENTO y no tengo escrito sin descuento en columna DESCUENTO U OBSEQUIO PRINCIPAL "].append(item)
-            errores_list.append({"verificar combinacion entre columna (DESCUENTO U OBSEQUIO PRINCIPAL)  y columna (APLICACIÓN DEL DESCUENTO)  ":dic})
+                    dic["Nulos en filas de la columna APLICACIONDESCUENTO y no tengo escrito sin descuento en columna DESCUENTOOBSEQUIOPRINCIPAL "].append(item)
+            errores_list.append({"verificar combinacion entre columna (DESCUENTOOBSEQUIOPRINCIPAL)  y columna (APLICACIONDESCUENTO)  ":dic})
             return errores_list
 
         def revisar_nroCA(excel, errores_list):
@@ -263,7 +272,7 @@ def correr_programa():
             # No deben quedar celdas vacías, si esto sucede 
             # la promoción no se va a incluir en el motor de recomendación
             dic = {}
-            columna = excel['NRO. DEL CA']
+            columna = excel['NUMEROCA']
 
             indexes_num, indexes_notnum = [], [] 
             for index, item in enumerate(columna, start = 1):
@@ -280,7 +289,7 @@ def correr_programa():
                     indexes_notnum.append(index)
             dic = {"es número pero no tiene 9 dígitos": indexes_num,"no es un número número de 9 dígitos" : indexes_notnum}
 
-            errores_list.append({'NRO. DEL CA':dic}) 
+            errores_list.append({'NUMEROCA':dic}) 
             return errores_list
 
         def verificar_provincias_localidades(excel,desplegable,errores_list):
@@ -306,7 +315,7 @@ def correr_programa():
 
         def revisar_vigencia(xls, errores_lista):
             dic = {}
-            columna = excel['VIGENCIA DESDE']
+            columna = excel['VIGENCIADESDE']
         #     mes_actual = 12
             mes_actual = (datetime.now()).month
             un_mes_mas_del_actual = mes_actual + 1
@@ -341,7 +350,7 @@ def correr_programa():
 
         def revisar_columa_tope_reintegro(excel, errores_list):
             dic = {}
-            columna_tope_reintegro = excel["TOPE DE REINTEGRO"]
+            columna_tope_reintegro = excel["TOPEREINTEGRO"]
             for index, item in enumerate(columna_tope_reintegro):
                 if type(item) == int:
                     pass
@@ -422,16 +431,13 @@ def correr_programa():
         
         
 
-imagen = PhotoImage(file="fondo6.png")    
+imagen = PhotoImage(file="fondo7.png")    
 background = Label(image = imagen)
 background.place(x = 0, y = 0, relwidth = 1, relheight = 1)
 
 
-txt_hoja_excel = Entry(ventana,width = 64 , borderwidth = 8, background = '#F0EBE6')
-txt_hoja_excel.place(x=684,y=430)
 
-
-boton_cargar_excel = Button(ventana, text = "Buscar Excel", bg=color_boton , width = 43, height = 2, command = mfileopen)
+boton_cargar_excel = Button(ventana, text = "Buscar Excel", bg=color_boton , width = 43, height = 2, command = lambda: mfileopen(ventana))
 boton_cargar_excel.place(x=684 , y=250)
 boton_reiniciar = Button(ventana, text = "Reiniciar", bg="#FF5429" , width = 11, height = 2, command = clear)
 boton_reiniciar.place(x=1000 , y=250)
